@@ -61,7 +61,7 @@ export default {
   },
   created() {
     if (this.loggedIn) {
-      this.$router.push("/profile");
+      this.$router.replace("/profile");
     }
   },
   methods: {
@@ -88,6 +88,7 @@ export default {
         "getCurrentUser",
         localStorage.getItem("user")
       );
+      console.log(this.$router);
       this.$router.push("/profile");
     },
   },
