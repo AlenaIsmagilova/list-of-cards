@@ -6,13 +6,18 @@
       <form class="form">
         <h2 class="modal-header">Регистрация</h2>
         <label class="label" for="name">Имя:</label>
-        <input class="input" id="name" type="text" v-model="name" />
+        <input class="input" id="name" type="text" v-model="username" />
         <p v-if="!name && submitted">Имя должно содержать латинские буквы</p>
         <label class="label" for="email">Электронная почта:</label>
-        <input class="input" id="email" v-model="email" />
+        <input class="input" id="email" v-model="form.email" />
         <p v-if="!email && submitted">Введите корректный электронный адрес</p>
         <label class="label" for="password">Пароль:</label>
-        <input class="input" type="password" id="password" v-model="password" />
+        <input
+          class="input"
+          type="password"
+          id="password"
+          v-model="form.password"
+        />
         <p v-if="!password && submitted">Введите пароль</p>
         <label class="label" for="repeat-password">Подтвердите пароль:</label>
         <input
@@ -33,33 +38,57 @@
 </template>
 
 <script>
+import { useRouter } from "vue-router";
+
 export default {
   data() {
     return {
       showModal: false,
-      name: null,
-      email: null,
-      password: null,
+      form: {
+        email: null,
+        password: null,
+      },
+      username: null,
       repeatPassword: null,
       submitted: false,
       noMatchesError: "",
     };
   },
+  computed: {
+    loggedIn() {
+      return this.$store.state.loggedIn;
+    },
+  },
+  created() {
+    if (this.loggedIn) {
+      this.$router.push("/profile");
+    }
+  },
   methods: {
-    checkForm(event) {
-      if (this.name && this.email && this.password === this.repeatPassword) {
+    checkForm() {
+      if (
+        this.username &&
+        this.form.email &&
+        this.form.password === this.repeatPassword
+      ) {
         this.showModal = false;
         this.noMatchesError = "";
         return true;
       }
 
-      if (this.password !== this.repeatPassword) {
+      if (this.form.password !== this.repeatPassword) {
         this.noMatchesError = "Пароли не совпадают";
       }
     },
-    handleSubmit() {
+    async handleSubmit() {
       this.submitted = true;
       this.checkForm();
+      await this.$store.dispatch("signUp", this.form);
+      await this.$store.dispatch(
+        "getCurrentUser",
+        localStorage.getItem("user")
+      );
+      this.$router.push("/profile");
     },
   },
 };
